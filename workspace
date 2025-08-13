@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+shopt -s nullglob
+set -ueo pipefail
+
+open() {
+    code "$1"
+    exit
+}
+
+current="$(pwd)"
+ws_file=""
+
+while true; do
+    ws_files=("$current/"*".code-workspace")
+    if [ "${#ws_files[@]}" -eq 1 ]; then
+        ws_file="${ws_files[0]}"
+        break
+    fi
+    if [ "${#ws_files[@]}" -gt 1 ]; then
+        echo "multiple workspace files found in '$current'" >&2
+        exit 1
+    fi
+    parent="$(dirname "$current")"
+    if [ "$parent" = "$current" ]; then
+        break
+    fi
+    current="$parent"
+done
+
+if [ -n "$ws_file" ]; then
+    echo "opening workspace '$ws_file'"
+    open "$ws_file"
+fi
+
+gitroot="$(git rev-parse --show-toplevel 2>/dev/null)"
+if [ -n "$gitroot" ]; then
+    echo "opening git root '$gitroot'"
+    open "$gitroot"
+fi
+
+echo "warning: cannot find workspace root" >&2
+open .
