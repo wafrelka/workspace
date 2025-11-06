@@ -39,13 +39,13 @@ while true; do
 done
 
 if [ -n "$ws_file" ]; then
-    info "opening workspace '$ws_file'"
+    info "multi-root workspace: $ws_file"
     open "$ws_file"
 fi
 
 gitroot="$(git rev-parse --show-toplevel 2>/dev/null || true)"
 if [ -n "$gitroot" ]; then
-    info "opening git root '$gitroot'"
+    info "git root: $gitroot"
     open "$gitroot"
 fi
 
