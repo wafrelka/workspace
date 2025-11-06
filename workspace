@@ -19,17 +19,23 @@ open() {
 }
 
 current="$(pwd)"
-ws_file=""
+workspace=""
+multiroot=""
 
 while true; do
-    ws_files=("$current/"*".code-workspace")
-    if [ "${#ws_files[@]}" -eq 1 ]; then
-        ws_file="${ws_files[0]}"
+    workspace_files=("$current/"*".code-workspace")
+    if [ "${#workspace_files[@]}" -eq 1 ]; then
+        workspace="${workspace_files[0]}"
+        multiroot="yes"
         break
     fi
-    if [ "${#ws_files[@]}" -gt 1 ]; then
+    if [ "${#workspace_files[@]}" -gt 1 ]; then
         error "multiple workspace files found in '$current'"
         exit 1
+    fi
+    if [ -f "$current/.vscode/settings.json" ]; then
+        workspace="$current"
+        break
     fi
     parent="$(dirname "$current")"
     if [ "$parent" = "$current" ]; then
@@ -38,9 +44,13 @@ while true; do
     current="$parent"
 done
 
-if [ -n "$ws_file" ]; then
-    info "multi-root workspace: $ws_file"
-    open "$ws_file"
+if [ -n "$workspace" ]; then
+    if [ -n "$multiroot" ]; then
+        info "multi-root workspace: $workspace"
+    else
+        info "single-root workspace: $workspace"
+    fi
+    open "$workspace"
 fi
 
 gitroot="$(git rev-parse --show-toplevel 2>/dev/null || true)"
