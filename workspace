@@ -3,6 +3,16 @@
 shopt -s nullglob
 set -ueo pipefail
 
+info() {
+    printf "%s\n" "$*" >&2
+}
+warning() {
+    printf "\e[33m%s\e[m\n" "$*" >&2
+}
+error() {
+    printf "\e[31m%s\e[m\n" "$*" >&2
+}
+
 open() {
     code "$1"
     exit
@@ -18,7 +28,7 @@ while true; do
         break
     fi
     if [ "${#ws_files[@]}" -gt 1 ]; then
-        echo "multiple workspace files found in '$current'" >&2
+        error "multiple workspace files found in '$current'"
         exit 1
     fi
     parent="$(dirname "$current")"
@@ -29,15 +39,15 @@ while true; do
 done
 
 if [ -n "$ws_file" ]; then
-    echo "opening workspace '$ws_file'"
+    info "opening workspace '$ws_file'"
     open "$ws_file"
 fi
 
 gitroot="$(git rev-parse --show-toplevel 2>/dev/null)"
 if [ -n "$gitroot" ]; then
-    echo "opening git root '$gitroot'"
+    info "opening git root '$gitroot'"
     open "$gitroot"
 fi
 
-echo "warning: cannot find workspace root" >&2
+warning "warning: cannot find workspace root"
 open .
